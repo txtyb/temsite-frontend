@@ -13,41 +13,55 @@
     <el-container>
       <el-header>
         <el-row>
-          <el-col :span="20">
-            <h1 class="title">温湿度监测</h1>
+          <el-col :span="18">
+            <span class="title">温湿度监测</span>
           </el-col>
           <el-col :span="4">
             <el-button type="primary" @click="refresh">Refresh</el-button>
+          </el-col>
+          <el-col :span="2" :pull="1">
+            <el-switch
+              class="refreshSwitch"
+              @change="refreshSwitch"
+              v-model="setAutoRefresh"
+              active-text="自动刷新"
+              inline-prompt
+              :active-icon="Check"
+              :inactive-icon="Close"
+            />
           </el-col>
         </el-row>
       </el-header>
       <el-main>
         <el-card class="box-card">
-          <div class="chart">
-            <line-chart
-              :data="temdata"
-              :min="null"
-              :max="null"
-              xtitle="时间"
-              ytitle="温度℃"
-            ></line-chart>
-          </div>
-          <div class="chart">
-            <area-chart
-              :data="rhdata"
-              :min="null"
-              :max="null"
-              xtitle="时间"
-              ytitle="湿度%"
-            ></area-chart>
-          </div>
-          <!-- <area-chart
+          <el-space direction="horizonal" :fill="true" warp>
+            <div class="chart">
+              <line-chart
+                :data="temdata"
+                :min="null"
+                :max="null"
+                xtitle="时间"
+                ytitle="温度℃"
+              ></line-chart>
+            </div>
+            <el-divider />
+            <div class="chart">
+              <area-chart
+                :data="rhdata"
+                :min="null"
+                :max="null"
+                xtitle="时间"
+                ytitle="湿度%"
+              ></area-chart>
+            </div>
+            <!-- <area-chart
             :data="fetchData"
             :min="null"
             :max="null"
             xtitle="时间"
             ytitle="湿度%"
           ></area-chart> -->
+          </el-space>
         </el-card>
       </el-main>
       <el-footer>
@@ -62,6 +76,12 @@
   </div>
   <!-- <line-chart :data="[[new Date(), 5], [1368174456, 4], ['2017-01-01 00:00:00 UTC', 7]]"></line-chart> -->
 </template>
+
+<script setup>
+import { ref } from "vue";
+import { Check, Close } from "@element-plus/icons-vue";
+const setAutoRefresh = ref(false);
+</script>
 
 <script>
 // import HelloWorld from './components/HelloWorld.vue'
@@ -107,9 +127,23 @@ export default {
         // .then(data => data.text())
         .then((data) => data.json())
         .then((data) => (this.rhdata = data));
+      console.log("refreshed");
     },
     test() {
       console.log("this is test");
+    },
+    // 切换自动刷新
+    refreshSwitch() {
+      console.log(this.setAutoRefresh);
+      if (!this.setAutoRefresh) {
+        clearInterval(this.autoRefresh);
+        console.log("Auto refresh disabled");
+      } else {
+        this.autoRefresh = setInterval(() => {
+          this.refresh();
+        }, 5000);
+        console.log("Auto refresh enabled");
+      }
     },
   },
   created() {
@@ -131,5 +165,13 @@ export default {
 }
 .chart {
   margin: 15px;
+}
+.title {
+  font-weight: bold;
+  font-size: 25px;
+}
+.refreshSwitch {
+  /* margin-left: -80px; */
+  margin-top: 8px;
 }
 </style>
