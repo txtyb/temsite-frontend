@@ -17,7 +17,7 @@
             <span class="title">温湿度监测</span>
           </el-col>
           <el-col :span="4">
-            <el-button type="primary" @click="refresh">Refresh</el-button>
+            <el-button type="primary" @click="refresh">刷新</el-button>
           </el-col>
           <el-col :span="2" :pull="1">
             <el-switch
@@ -34,7 +34,7 @@
       </el-header>
       <el-main>
         <el-card class="box-card">
-          <el-space direction="horizonal" :fill="true" warp>
+          <el-space direction="horizonal" :fill="true" warp class="charts">
             <div class="chart">
               <line-chart
                 :data="temdata"
@@ -119,14 +119,14 @@ export default {
         method: "get",
       })
         // .then(data => data.text())
-        .then((data) => data.json())
-        .then((data) => (this.temdata = data));
+        .then((data) => data.text())
+        .then((data) => (this.temdata = eval(data)));
       fetch("https://temsite-serverless-txtyb.vercel.app/api/getrh", {
         method: "get",
       })
         // .then(data => data.text())
-        .then((data) => data.json())
-        .then((data) => (this.rhdata = data));
+        .then((data) => data.text())
+        .then((data) => (this.rhdata = eval(data)));
       console.log("refreshed");
     },
     test() {
@@ -173,5 +173,8 @@ export default {
 .refreshSwitch {
   /* margin-left: -80px; */
   margin-top: 8px;
+}
+.charts {
+  overflow: hidden;
 }
 </style>
