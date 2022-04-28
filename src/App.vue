@@ -119,14 +119,14 @@ export default {
         method: "get",
       })
         // .then(data => data.text())
-        .then((data) => data.text())
-        .then((data) => (this.temdata = eval(data)));
+        .then((data) => data.json())
+        .then((data) => (this.temdata = data));
       fetch("https://temsite-serverless-txtyb.vercel.app/api/getrh", {
         method: "get",
       })
         // .then(data => data.text())
-        .then((data) => data.text())
-        .then((data) => (this.rhdata = eval(data)));
+        .then((data) => data.json())
+        .then((data) => (this.rhdata = data));
       console.log("refreshed");
     },
     test() {
