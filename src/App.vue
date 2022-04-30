@@ -1,14 +1,126 @@
+<script setup lang="ts">
+// This starter template is using Vue 3 <script setup> SFCs
+// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
+
+import { ref } from "vue";
+import { Check, Close } from "@element-plus/icons-vue";
+const setAutoRefresh = ref(false);
+
+const dataNum = ref(50);
+
+defineExpose({
+  setAutoRefresh,
+  dataNum,
+});
+</script>
+
+<script lang="ts">
+// import HelloWorld from './components/HelloWorld.vue'
+// import { ref } from "vue"
+
+export default {
+  // el: "#app",
+  name: "App",
+  // setup() {
+  //   const setAutoRefresh = ref(false)
+  //   const dataNum = ref(50)
+
+  //   return {
+  //     setAutoRefresh,
+  //     dataNum
+  //   }
+  // },
+  data() {
+    return {
+      // temdata: "",
+      rhdata: "",
+      temdata: "",
+      tableData: [],
+      // setAutoRefresh: ref(false),
+      // dataNum: ref(50),
+    };
+  },
+  computed: {
+    fetchData() {
+      return { "2021-01-01": 2, "2021-01-02": 3 };
+    },
+    // temdata: gettem()
+  },
+  created() {},
+  mounted() {
+    this.refresh();
+    this.test();
+  },
+  methods: {
+    // gettem() {
+    //   var data;
+    //   // var response = fetch("https://temsite-serverless-txtyb.vercel.app/api/gettem", {
+    //   //   method: "get",
+    //   // })
+    //   fetch("https://temsite-serverless-txtyb.vercel.app/api/gettem", {method: 'get'})
+    //   .then(res => res.json())
+    //   .then(json => data = json)
+    //   return data
+    // },
+    refresh() {
+      // function updateData(url, dst) {
+      //   fetch(url, {
+      //     method: "get",
+      //   })
+      //     // .then(data => data.text())
+      //     .then((data, dst) => {
+      //       data.json()})
+      //     .then((data, dst) => (dst = data));
+      // }
+      var url =
+        "https://temsite-serverless-txtyb.vercel.app/api/gettem?n=" +
+        this.dataNum;
+      fetch(url, {
+        method: "get",
+      })
+        // .then(data => data.text())
+        .then((data) => data.json())
+        .then((data) => (this.$data.temdata = data));
+      // updateData(url, this.temdata);
+      url =
+        "https://temsite-serverless-txtyb.vercel.app/api/getrh?n=" +
+        this.dataNum;
+      fetch(url, {
+        method: "get",
+      })
+        // .then(data => data.text())
+        .then((data) => data.json())
+        .then((data) => (this.$data.rhdata = data));
+      url = "https://temsite-serverless-txtyb.vercel.app/api/get?ts=0";
+      fetch(url, {
+        method: "get",
+      })
+        // .then(data => data.text())
+        .then((data) => data.json())
+        .then((data) => (this.$data.tableData = data));
+      console.log("refreshed");
+    },
+    test() {
+      console.log("this is test");
+    },
+    // 切换自动刷新
+    refreshSwitch() {
+      console.log(this.setAutoRefresh);
+      if (!this.setAutoRefresh) {
+        clearInterval(this.autoRefresh);
+        console.log("Auto refresh disabled");
+      } else {
+        this.autoRefresh = setInterval(() => {
+          this.refresh();
+        }, 5000);
+        console.log("Auto refresh enabled");
+      }
+    },
+  },
+};
+</script>
+
 <template>
-  <!-- <img src="./assets/logo.png">
-  <div>
-    <p>
-      If Element Plus is successfully added to this project, you'll see an
-      <code v-text="'<el-button>'"></code>
-      below
-    </p>
-    <el-button type="primary">el-button</el-button>
-  </div>
-  <HelloWorld msg="Welcome to Your Vue.js App"/> -->
   <div class="common-layout">
     <el-container>
       <el-header>
@@ -46,7 +158,7 @@
       </el-header>
       <el-main>
         <el-card class="box-card">
-          <el-space direction="horizonal" :fill="true" warp class="charts">
+          <el-space direction="horizontal" :fill="true" warp class="charts">
             <div class="chart">
               <line-chart
                 :data="temdata"
@@ -98,125 +210,6 @@
   <!-- <line-chart :data="[[new Date(), 5], [1368174456, 4], ['2017-01-01 00:00:00 UTC', 7]]"></line-chart> -->
 </template>
 
-<script>
-// import HelloWorld from './components/HelloWorld.vue'
-// import { ref } from "vue"
-
-export default {
-  // el: "#app",
-  name: "App",
-  // setup() {
-  //   const setAutoRefresh = ref(false)
-  //   const dataNum = ref(50)
-    
-  //   return {
-  //     setAutoRefresh, 
-  //     dataNum
-  //   }
-  // }, 
-  data() {
-    return {
-      // temdata: "",
-      rhdata: "",
-      temdata: "",
-      tableData: [],
-      // setAutoRefresh: ref(false), 
-      // dataNum: ref(50), 
-    };
-  },
-  computed: {
-    fetchData() {
-      return { "2021-01-01": 2, "2021-01-02": 3 };
-    },
-    // temdata: gettem()
-  },
-  created() {},
-  mounted() {
-    this.refresh();
-    this.test();
-  },
-  methods: {
-    // gettem() {
-      //   var data;
-    //   // var response = fetch("https://temsite-serverless-txtyb.vercel.app/api/gettem", {
-    //   //   method: "get",
-    //   // })
-    //   fetch("https://temsite-serverless-txtyb.vercel.app/api/gettem", {method: 'get'})
-    //   .then(res => res.json())
-    //   .then(json => data = json)
-    //   return data
-    // },
-    refresh() {
-      // function updateData(url, dst) {
-        //   fetch(url, {
-          //     method: "get",
-      //   })
-      //     // .then(data => data.text())
-      //     .then((data, dst) => {
-        //       data.json()})
-      //     .then((data, dst) => (dst = data));
-      // }
-      var url =
-        "https://temsite-serverless-txtyb.vercel.app/api/gettem?n=" +
-        this.dataNum;
-      fetch(url, {
-        method: "get",
-      })
-        // .then(data => data.text())
-        .then((data) => data.json())
-        .then((data) => (this.$data.temdata = data));
-      // updateData(url, this.temdata);
-      url =
-        "https://temsite-serverless-txtyb.vercel.app/api/getrh?n=" +
-        this.dataNum;
-      fetch(url, {
-        method: "get",
-      })
-        // .then(data => data.text())
-        .then((data) => data.json())
-        .then((data) => (this.$data.rhdata = data));
-      url = "https://temsite-serverless-txtyb.vercel.app/api/get?ts=0";
-      fetch(url, {
-        method: "get",
-      })
-        // .then(data => data.text())
-        .then((data) => data.json())
-        .then((data) => (this.$data.tableData = data));
-      console.log("refreshed");
-    },
-    test() {
-      console.log("this is test");
-    },
-    // 切换自动刷新
-    refreshSwitch() {
-      console.log(this.setAutoRefresh);
-      if (!this.setAutoRefresh) {
-        clearInterval(this.autoRefresh);
-        console.log("Auto refresh disabled");
-      } else {
-        this.autoRefresh = setInterval(() => {
-          this.refresh();
-        }, 5000);
-        console.log("Auto refresh enabled");
-      }
-    },
-  },
-};
-</script>
-  
-<script setup>
-import { ref } from "vue";
-import { Check, Close } from "@element-plus/icons-vue";
-const setAutoRefresh = ref(false);
-
-const dataNum = ref(50);
-
-defineExpose({
-  setAutoRefresh,
-  dataNum,
-});
-</script>
-
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -237,9 +230,9 @@ defineExpose({
   /* margin-left: -80px; */
   margin-top: 8px;
 }
-.charts {
+/* .charts {
   overflow: hidden;
-}
+} */
 .slider-block {
   /* display: flex; */
   align-items: center;
