@@ -4,6 +4,7 @@
 
 import { onMounted, ref } from "vue";
 import { Check, Close } from "@element-plus/icons-vue";
+import { Timer } from '@element-plus/icons-vue'
 
 // const dataNum = ref(50);
 
@@ -228,9 +229,16 @@ export default {
         </el-card>
         <el-card class="tables">
           <div>
-            <el-table :data="tableData" style="width: 100%" max-height="500" stripe fit > 
+            <el-table :data="tableData" style="width: 100%" max-height="500" stripe fit>
               <el-table-column type="index" width="70" />
-              <el-table-column prop="time" label="时间" width="800" />
+              <el-table-column prop="time" label="时间" width="800">
+                <template #default="scope">
+                  <div style="display: flex; align-items: center">
+                    <el-icon><timer /></el-icon>
+                    <span style="margin-left: 10px">{{ scope.row.time }}</span>
+                  </div>
+                </template>
+              </el-table-column>
               <el-table-column prop="tem" label="温度" />
               <el-table-column prop="rh" label="湿度" />
             </el-table>
