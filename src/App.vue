@@ -206,13 +206,13 @@ export default {
       }
     },
     sendNotification(rowData: any, token: string) {
-      var data = { "to": "f8yeN24VSWmHnzk2qkaA88:APA91bH1bu3-V7YdSXferrbfkNAOcFjbTjSCnQ4G3F_iyYCCx5MSuCKGGdMhJO-kZ3q1YTTsApRF75k_J1-GH28_aga3G_L3YpOVGF1IH4v9hAC0I1S8Xgd3T1wS1yaj7thtNcoHFRKu", "time_to_live": 60, "priority": "high", "data": { "text": { "title": String(rowData.time), "message": `tem=${rowData.tem}, rh=${rowData.rh}`, "clipboard": false } } }
+      var data = { "to": `${token}`, "time_to_live": 60, "priority": "high", "data": { "text": { "title": String(rowData.time), "message": `tem=${rowData.tem}, rh=${rowData.rh}`, "clipboard": false } } }
       fetch('https://fcm.googleapis.com/fcm/send', {
         method: 'POST',
         body: JSON.stringify(data), // data can be `string` or {object}!
         headers: new Headers({
           'Content-Type': 'application/json',
-          'Authorization': token,
+          'Authorization': 'key=AAAASwElybY:APA91bFaTT_zKLcLYqB0soW8PJmFFG7x1F3wiR0MGta9lLsU22uAVa0VD_3zzz-OremJKDEWEf52OD554byamcwAmZldgrQKfwAjjbhZz_5DYT-z1gcflUBFSWVQQ9lSE9KwDBNHULvfVKmQwxa7xNwuPHz-VfdTbw',
         })
       }).then(res => res.json())
         .catch(error => console.error('Error:', error))
@@ -412,10 +412,10 @@ export default {
 }
 
 .el-table .warning-row {
-  --el-table-tr-bg-color: var(--el-color-warning-light-8);
+  --el-table-tr-bg-color: var(--el-color-warning-light-9);
 }
 
 .el-table .success-row {
-  --el-table-tr-bg-color: var(--el-color-success-light-8);
+  --el-table-tr-bg-color: var(--el-color-success-light-9);
 }
 </style>
