@@ -88,6 +88,7 @@ const dataNum = ref(50);
 const rhdata = ref("");
 const temdata = ref("");
 const tableData = ref([]);
+const warningRowIndex = ref<number[]>([]);
 
 const setAutoRefresh = ref(false);
 const addTokenFormVisible = ref(false)
@@ -180,12 +181,15 @@ export default {
         // .then(data => data.text())
         .then((data) => data.json())
         .then((data) => (tableData.value = data));
+
+      this.getWarningIndex();
+
       console.log("refreshed");
     },
     test(index: number, row: any) {
       console.log("this is test");
-      console.log(index, row)
-      
+      console.log(`index=${index}`)
+      console.log(row)
     },
     // 切换自动刷新
     refreshSwitch(this: any) {
@@ -201,18 +205,47 @@ export default {
       }
     },
     sendNotification(rowData: any, token: string) {
-      var data = {"to":"f8yeN24VSWmHnzk2qkaA88:APA91bH1bu3-V7YdSXferrbfkNAOcFjbTjSCnQ4G3F_iyYCCx5MSuCKGGdMhJO-kZ3q1YTTsApRF75k_J1-GH28_aga3G_L3YpOVGF1IH4v9hAC0I1S8Xgd3T1wS1yaj7thtNcoHFRKu","time_to_live":60,"priority":"high","data":{"text":{"title":String(rowData.time),"message":`tem=${rowData.tem}, rh=${rowData.rh}`,"clipboard":false}}}
+      var data = { "to": "f8yeN24VSWmHnzk2qkaA88:APA91bH1bu3-V7YdSXferrbfkNAOcFjbTjSCnQ4G3F_iyYCCx5MSuCKGGdMhJO-kZ3q1YTTsApRF75k_J1-GH28_aga3G_L3YpOVGF1IH4v9hAC0I1S8Xgd3T1wS1yaj7thtNcoHFRKu", "time_to_live": 60, "priority": "high", "data": { "text": { "title": String(rowData.time), "message": `tem=${rowData.tem}, rh=${rowData.rh}`, "clipboard": false } } }
       fetch('https://fcm.googleapis.com/fcm/send', {
-        method: 'POST', 
+        method: 'POST',
         body: JSON.stringify(data), // data can be `string` or {object}!
         headers: new Headers({
-          'Content-Type': 'application/json', 
+          'Content-Type': 'application/json',
           'Authorization': token,
         })
       }).then(res => res.json())
         .catch(error => console.error('Error:', error))
         .then(response => console.log('Success:', response));
-    }
+    },
+    getWarningIndex() {
+      var url =
+        "https://temsite-serverless-txtyb.vercel.app/api/warningindex";
+      fetch(url, {
+        method: "get",
+      })
+        .then((data) => data.json())
+        .then((res) => (warningRowIndex.value = res));
+    },
+    setWarningIndex(index: number) {
+      var url =
+        "https://temsite-serverless-txtyb.vercel.app/api/warningindex?set=" + index;
+      fetch(url, {
+        method: "get",
+      })
+        .then((data) => data.json())
+        .then((res) => (console.log(res)));
+    },
+    tableRowClassName({ row, rowIndex }: {
+      row: any
+      rowIndex: number
+    }) {
+      if (warningRowIndex.value.includes(rowIndex)) {
+        return 'warning-row'
+      }
+      else {
+        return ''
+      }
+    },
   },
 };
 </script>
@@ -281,7 +314,7 @@ export default {
         </el-card>
         <el-card class="tables">
           <div>
-            <el-table :data="tableData" style="width: 100%" max-height="500" stripe>
+            <el-table :data="tableData" style="width: 100%" max-height="500" :row-class-name="tableRowClassName">
               <el-table-column type="index" min-width="10%" />
               <el-table-column prop="time" label="时间" min-width="40%">
                 <template #default="scope">
@@ -297,7 +330,9 @@ export default {
               <el-table-column prop="rh" label="湿度" min-width="20%" />
               <el-table-column label="通知操作" min-width="10%">
                 <template #default="scope">
-                  <el-button size="small" @click="test(scope.$index, scope.row), sendNotification(scope.row,tokenForm.token)">发送</el-button>
+                  <el-button size="small"
+                    @click="test(scope.$index, scope.row), sendNotification(scope.row, tokenForm.token)">发送</el-button>
+                  <el-button size="small" @click="setWarningIndex(scope.$index)">标记测试</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -351,5 +386,13 @@ export default {
   margin-left: -20%;
   margin-right: 5%;
   margin-top: 10px;
+}
+
+.el-table .warning-row {
+  --el-table-tr-bg-color: var(--el-color-warning-light-8);
+}
+
+.el-table .success-row {
+  --el-table-tr-bg-color: var(--el-color-success-light-8);
 }
 </style>
