@@ -3,14 +3,14 @@
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 
 import { onMounted, ref, reactive } from "vue";
-import { Check, Close, Setting } from "@element-plus/icons-vue";
+import { Check, Close, Setting, Delete } from "@element-plus/icons-vue";
 import { Timer } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
-const displayTokenSubmitMsg = () => {
+const displaySuccessMsg = () => {
   ElMessage({
     showClose: true,
-    message: '添加成功',
+    message: '操作成功',
     type: 'success',
   })
 }
@@ -87,11 +87,12 @@ const dataNum = ref(50);
 
 const rhdata = ref("");
 const temdata = ref("");
-const tableData = ref([]);
+const tableData = ref<any[]>([]);
 const warningRowIndex = ref<number[]>([]);
 
 const setAutoRefresh = ref(false);
 const addTokenFormVisible = ref(false)
+const deleteDialogVisible = ref(false)
 
 const formLabelWidth = '140px'
 
@@ -232,9 +233,19 @@ export default {
       fetch(url, {
         method: "get",
       })
-        .then((data) => data.json())
+        .then((data) => data.text())
         .then((res) => (console.log(res)));
     },
+    delAllData() {
+      var url =
+        "https://temsite-serverless-txtyb.vercel.app/api/del";
+      fetch(url, {
+        method: "get",
+      })
+        .then((data) => data.text())
+        .then((res) => (console.log(res)));
+      tableData.value.length=0;
+    }, 
     tableRowClassName({ row, rowIndex }: {
       row: any
       rowIndex: number
@@ -266,10 +277,22 @@ export default {
           <el-col :span="2">
             <el-button type="primary" @click="refresh">刷新 {{ setAutoRefresh }}</el-button>
           </el-col>
-          <el-col :span="4" :pull="1">
+          <el-col :span="3">
             <span class="switch-text">自动刷新</span>
             <el-switch class="refreshSwitch" v-model="setAutoRefresh" inline-prompt :active-icon="Check"
               :inactive-icon="Close" @change="refreshSwitch" />
+          </el-col>
+          <el-col :span="1">
+            <el-button type="danger" :icon="Delete" @click="deleteDialogVisible = true" circle />
+            <el-dialog v-model="deleteDialogVisible" title="删除统计数据" width="30%">
+              <span>确定要删除所有数据吗？</span>
+              <template #footer>
+                <span class="dialog-footer">
+                  <el-button @click="deleteDialogVisible = false">取消</el-button>
+                  <el-button type="primary" @click="delAllData(), deleteDialogVisible = false, refresh(), displaySuccessMsg()">确认</el-button>
+                </span>
+              </template>
+            </el-dialog>
           </el-col>
           <el-col :span="1">
             <el-button :icon="Setting" circle @click="addTokenFormVisible = true" />
@@ -285,7 +308,7 @@ export default {
               <template #footer>
                 <span class="dialog-footer">
                   <el-button @click="addTokenFormVisible = false">取消</el-button>
-                  <el-button type="primary" @click="addTokenFormVisible = false, displayTokenSubmitMsg();">确认
+                  <el-button type="primary" @click="addTokenFormVisible = false, displaySuccessMsg();">确认
                   </el-button>
                 </span>
               </template>
