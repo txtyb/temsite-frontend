@@ -2,9 +2,18 @@
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 
-import { onMounted, ref } from "vue";
-import { Check, Close } from "@element-plus/icons-vue";
+import { onMounted, ref, reactive } from "vue";
+import { Check, Close, Setting } from "@element-plus/icons-vue";
 import { Timer } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+
+const displayTokenSubmitMsg = () => {
+  ElMessage({
+    showClose: true,
+    message: '添加成功',
+    type: 'success',
+  })
+}
 
 // const dataNum = ref(50);
 
@@ -81,6 +90,14 @@ const temdata = ref("");
 const tableData = ref([]);
 
 const setAutoRefresh = ref(false);
+const addTokenFormVisible = ref(false)
+
+const formLabelWidth = '140px'
+
+const tokenForm = reactive({
+  name: '',
+  token: ''
+})
 
 export default {
   // el: "#app",
@@ -114,7 +131,7 @@ export default {
   mounted() {
     console.log(`print setAutoRefresh = ${setAutoRefresh.value}`)
     this.refresh();
-    this.test();
+    // this.test();
   },
   methods: {
     // // gettem() {
@@ -165,8 +182,10 @@ export default {
         .then((data) => (tableData.value = data));
       console.log("refreshed");
     },
-    test() {
+    test(index: number, row: any) {
       console.log("this is test");
+      console.log(index, row)
+      
     },
     // 切换自动刷新
     refreshSwitch(this: any) {
@@ -181,6 +200,19 @@ export default {
         console.log("Auto refresh enabled");
       }
     },
+    sendNotification(rowData: any, token: string) {
+      var data = {"to":"f8yeN24VSWmHnzk2qkaA88:APA91bH1bu3-V7YdSXferrbfkNAOcFjbTjSCnQ4G3F_iyYCCx5MSuCKGGdMhJO-kZ3q1YTTsApRF75k_J1-GH28_aga3G_L3YpOVGF1IH4v9hAC0I1S8Xgd3T1wS1yaj7thtNcoHFRKu","time_to_live":60,"priority":"high","data":{"text":{"title":String(rowData.time),"message":`tem=${rowData.tem}, rh=${rowData.rh}`,"clipboard":false}}}
+      fetch('https://fcm.googleapis.com/fcm/send', {
+        method: 'POST', 
+        body: JSON.stringify(data), // data can be `string` or {object}!
+        headers: new Headers({
+          'Content-Type': 'application/json', 
+          'Authorization': token,
+        })
+      }).then(res => res.json())
+        .catch(error => console.error('Error:', error))
+        .then(response => console.log('Success:', response));
+    }
   },
 };
 </script>
@@ -190,7 +222,7 @@ export default {
     <el-container>
       <el-header>
         <el-row>
-          <el-col :span="10">
+          <el-col :span="9">
             <span class="title">温湿度监测</span>
           </el-col>
           <el-col :span="8">
@@ -205,6 +237,26 @@ export default {
             <span class="switch-text">自动刷新</span>
             <el-switch class="refreshSwitch" v-model="setAutoRefresh" inline-prompt :active-icon="Check"
               :inactive-icon="Close" @change="refreshSwitch" />
+          </el-col>
+          <el-col :span="1">
+            <el-button :icon="Setting" circle @click="addTokenFormVisible = true" />
+            <el-dialog v-model="addTokenFormVisible" title="添加新token">
+              <el-form :model="tokenForm">
+                <el-form-item label="设备名称" :label-width="formLabelWidth">
+                  <el-input v-model="tokenForm.name" autocomplete="off" />
+                </el-form-item>
+                <el-form-item label="token" :label-width="formLabelWidth">
+                  <el-input v-model="tokenForm.token" placeholder="请输入token" />
+                </el-form-item>
+              </el-form>
+              <template #footer>
+                <span class="dialog-footer">
+                  <el-button @click="addTokenFormVisible = false">取消</el-button>
+                  <el-button type="primary" @click="addTokenFormVisible = false, displayTokenSubmitMsg();">确认
+                  </el-button>
+                </span>
+              </template>
+            </el-dialog>
           </el-col>
         </el-row>
       </el-header>
@@ -229,18 +281,25 @@ export default {
         </el-card>
         <el-card class="tables">
           <div>
-            <el-table :data="tableData" style="width: 100%" max-height="500" stripe fit>
-              <el-table-column type="index" width="70" />
-              <el-table-column prop="time" label="时间" width="800">
+            <el-table :data="tableData" style="width: 100%" max-height="500" stripe>
+              <el-table-column type="index" min-width="10%" />
+              <el-table-column prop="time" label="时间" min-width="40%">
                 <template #default="scope">
                   <div style="display: flex; align-items: center">
-                    <el-icon><timer /></el-icon>
+                    <el-icon>
+                      <timer />
+                    </el-icon>
                     <span style="margin-left: 10px">{{ scope.row.time }}</span>
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column prop="tem" label="温度" />
-              <el-table-column prop="rh" label="湿度" />
+              <el-table-column prop="tem" label="温度" min-width="20%" />
+              <el-table-column prop="rh" label="湿度" min-width="20%" />
+              <el-table-column label="通知操作" min-width="10%">
+                <template #default="scope">
+                  <el-button size="small" @click="test(scope.$index, scope.row), sendNotification(scope.row,tokenForm.token)">发送</el-button>
+                </template>
+              </el-table-column>
             </el-table>
           </div>
         </el-card>
@@ -255,7 +314,6 @@ export default {
       </el-footer>
     </el-container>
   </div>
-  <!-- <line-chart :data="[[new Date(), 5], [1368174456, 4], ['2017-01-01 00:00:00 UTC', 7]]"></line-chart> -->
 </template>
 
 <style>
