@@ -367,12 +367,16 @@ export default {
         </el-card>
       </el-main>
       <el-footer>
-        <el-card>
-          <div class="rawdata">
-            <p>raw tem: {{ temdata }}</p>
-            <p>raw rh: {{ rhdata }}</p>
-          </div>
-        </el-card>
+        <el-collapse>
+          <el-collapse-item title="Debug Area">
+            <el-card>
+              <div class="rawdata">
+                <p>raw tem: {{ temdata }}</p>
+                <p>raw rh: {{ rhdata }}</p>
+              </div>
+            </el-card>
+          </el-collapse-item>
+        </el-collapse>
       </el-footer>
     </el-container>
   </div>
@@ -422,6 +426,7 @@ export default {
 .el-table .success-row {
   --el-table-tr-bg-color: var(--el-color-success-light-9);
 }
+
 .backtop {
   box-shadow: --el-box-shadow-light;
 }
