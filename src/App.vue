@@ -244,8 +244,8 @@ export default {
       })
         .then((data) => data.text())
         .then((res) => (console.log(res)));
-      tableData.value.length=0;
-    }, 
+      tableData.value.length = 0;
+    },
     tableRowClassName({ row, rowIndex }: {
       row: any
       rowIndex: number
@@ -262,6 +262,9 @@ export default {
 </script>
 
 <template>
+  <div>
+    <el-backtop class="backtop" :bottom="100" />
+  </div>
   <div class="common-layout">
     <el-container>
       <el-header>
@@ -289,7 +292,8 @@ export default {
               <template #footer>
                 <span class="dialog-footer">
                   <el-button @click="deleteDialogVisible = false">取消</el-button>
-                  <el-button type="primary" @click="delAllData(), deleteDialogVisible = false, refresh(), displaySuccessMsg()">确认</el-button>
+                  <el-button type="primary"
+                    @click="delAllData(), deleteDialogVisible = false, refresh(), displaySuccessMsg()">确认</el-button>
                 </span>
               </template>
             </el-dialog>
@@ -417,5 +421,8 @@ export default {
 
 .el-table .success-row {
   --el-table-tr-bg-color: var(--el-color-success-light-9);
+}
+.backtop {
+  box-shadow: --el-box-shadow-light;
 }
 </style>
