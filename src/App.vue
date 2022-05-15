@@ -207,7 +207,7 @@ export default {
     },
     sendNotification(rowData: any, token: string) {
       var data = { "to": `${token}`, "time_to_live": 60, "priority": "high", "data": { "text": { "title": String(rowData.time), "message": `tem=${rowData.tem}, rh=${rowData.rh}`, "clipboard": false } } }
-      fetch('https://fcm.googleapis.com/fcm/send', {
+      fetch('https://temsite-serverless.vercel.app/api/sendtofcm', {
         method: 'POST',
         body: JSON.stringify(data), // data can be `string` or {object}!
         headers: new Headers({
