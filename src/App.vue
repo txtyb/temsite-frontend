@@ -84,9 +84,16 @@ defineExpose({
 // import { ref } from "vue"
 
 const dataNum = ref(50);
+const inputWarningTem = ref<number>();
+const inputWarningRh = ref<number>();
+
+// when tableData changed, make a change to this key too can make sure table view update，but it reset the scroll bar position of the table
+const tableUpdateKey = ref<number>(0);
 
 const rhdata = ref("");
 const temdata = ref("");
+const currentWarningTem = ref("无")
+const currentWarningRh = ref("无")
 const tableData = ref<any[]>([]);
 const warningRowIndex = ref<number[]>([]);
 
@@ -147,17 +154,29 @@ export default {
     // //   return data
     // // },
     refresh() {
-      // function updateData(url, dst) {
-      //   fetch(url, {
-      //     method: "get",
-      //   })
-      //     // .then(data => data.text())
-      //     .then((data, dst) => {
-      //       data.json()})
-      //     .then((data, dst) => (dst = data));
-      // }
-      var url =
-        "https://temsite-serverless-txtyb.vercel.app/api/gettem?n=" +
+      var url = "https://temsite-serverless.vercel.app/api/get?ts=0";
+      fetch(url, {
+        method: "get",
+      })
+        // .then(data => data.text())
+        .then((data) => data.json())
+        .then((data) => (tableData.value = data));
+      console.log('tableData updated')
+
+      url =
+        "https://temsite-serverless.vercel.app/api/getrh?n=" +
+        dataNum.value;
+      fetch(url, {
+        method: "get",
+      })
+        // .then(data => data.text())
+        .then((data) => data.json())
+        .then((data) => (rhdata.value = data));
+      
+      this.getWarningValues();
+
+      url =
+        "https://temsite-serverless.vercel.app/api/gettem?n=" +
         dataNum.value;
       fetch(url, {
         method: "get",
@@ -166,24 +185,9 @@ export default {
         .then((data) => data.json())
         .then((data) => (temdata.value = data));
       // updateData(url, this.temdata);
-      url =
-        "https://temsite-serverless-txtyb.vercel.app/api/getrh?n=" +
-        dataNum.value;
-      fetch(url, {
-        method: "get",
-      })
-        // .then(data => data.text())
-        .then((data) => data.json())
-        .then((data) => (rhdata.value = data));
-      url = "https://temsite-serverless-txtyb.vercel.app/api/get?ts=0";
-      fetch(url, {
-        method: "get",
-      })
-        // .then(data => data.text())
-        .then((data) => data.json())
-        .then((data) => (tableData.value = data));
 
-      this.getWarningIndex();
+      // update table view
+      // tableUpdateKey.value++
 
       console.log("refreshed");
     },
@@ -220,7 +224,7 @@ export default {
     },
     getWarningIndex() {
       var url =
-        "https://temsite-serverless-txtyb.vercel.app/api/warningindex";
+        "https://temsite-serverless.vercel.app/api/getWarningIndex";
       fetch(url, {
         method: "get",
       })
@@ -229,7 +233,7 @@ export default {
     },
     setWarningIndex(index: number) {
       var url =
-        "https://temsite-serverless-txtyb.vercel.app/api/warningindex?set=" + index;
+        "https://temsite-serverless.vercel.app/api/setWarningIndex?set=" + index;
       fetch(url, {
         method: "get",
       })
@@ -238,25 +242,82 @@ export default {
     },
     delAllData() {
       var url =
-        "https://temsite-serverless-txtyb.vercel.app/api/del";
+        "https://temsite-serverless.vercel.app/api/del";
       fetch(url, {
         method: "get",
       })
         .then((data) => data.text())
         .then((res) => (console.log(res)));
-      tableData.value.length = 0;
+      tableData.value.length = 0
     },
     tableRowClassName({ row, rowIndex }: {
       row: any
       rowIndex: number
     }) {
-      if (warningRowIndex.value.includes(rowIndex)) {
+      if (tableData.value[rowIndex].warning == 1) {
         return 'warning-row'
       }
       else {
         return ''
       }
     },
+    setFcmToken() {
+      var url =
+        "https://temsite-serverless.vercel.app/api/setFcmToken?token=" +
+        tokenForm.token;
+      fetch(url, {
+        method: "get",
+      })
+        .then((res) => res.text())
+        .then((res) => console.log(`tokenset: ${res}`))
+    }, 
+    clearFcmToken() {
+      var url =
+        "https://temsite-serverless.vercel.app/api/clearFcmToken"
+      fetch(url, {
+        method: "get",
+      })
+        .then((res) => res.text())
+        .then((res) => console.log(`tokenclear: ${res}`))
+    }, 
+    setWarningValues() {
+      var url =
+        "https://temsite-serverless.vercel.app/api/setWarningValues?tem=" + (inputWarningTem.value?inputWarningTem.value:'') + '&rh=' + (inputWarningRh.value?inputWarningRh.value:'')
+        // "http://localhost:5000/api/setWarningValues?tem=" + (inputWarningTem.value?inputWarningTem.value:'') + '&rh=' + (inputWarningRh.value?inputWarningRh.value:'')
+      fetch(url, {
+        method: "get",
+      })
+        .then((res) => res.text())
+        .then((res) => {
+          console.log(`set: ${res}`)
+        })
+    }, 
+    getWarningValues() {
+      var url =
+        "https://temsite-serverless.vercel.app/api/getWarningValues"
+        // "http://localhost:5000/api/getWarningValues"
+      fetch(url, {
+        method: "get",
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          console.log(`get: tem=${res.tem} rh=${res.rh}`)
+          currentWarningTem.value = res.tem ? res.tem.toString() : '无'
+          currentWarningRh.value = res.rh ? res.rh.toString() : '无'
+        })
+    }, 
+    clearWarningValues() {
+      var url =
+        "https://temsite-serverless.vercel.app/api/clearWarningValues"
+        // "http://localhost:5000/api/clearWarningValues"
+      fetch(url, {
+        method: "get",
+      })
+        .then((res) => res.text())
+        .then((res) => {
+          console.log(res)
+        })
+    }, 
   },
 };
 </script>
@@ -277,10 +338,8 @@ export default {
               <el-slider v-model="dataNum" show-input @click="refresh" label="123" />
             </div>
           </el-col>
-          <el-col :span="2">
-            <el-button type="primary" @click="refresh">刷新 {{ setAutoRefresh }}</el-button>
-          </el-col>
-          <el-col :span="3">
+          <el-col :span="5">
+            <el-button type="primary" @click="refresh">刷新</el-button>
             <span class="switch-text">自动刷新</span>
             <el-switch class="refreshSwitch" v-model="setAutoRefresh" inline-prompt :active-icon="Check"
               :inactive-icon="Close" @change="refreshSwitch" />
@@ -306,7 +365,13 @@ export default {
                   <el-input v-model="tokenForm.name" autocomplete="off" />
                 </el-form-item>
                 <el-form-item label="token" :label-width="formLabelWidth">
-                  <el-input v-model="tokenForm.token" placeholder="请输入token" />
+                  <el-col :span="18">
+                    <el-input v-model="tokenForm.token" placeholder="请输入token" />
+                  </el-col>
+                  <el-col :span="6">
+                    <el-button @click="setFcmToken(), displaySuccessMsg()">上传</el-button>
+                    <el-button @click="clearFcmToken(), displaySuccessMsg()">清除</el-button>
+                  </el-col>
                 </el-form-item>
               </el-form>
               <template #footer>
@@ -339,9 +404,33 @@ export default {
           ></area-chart> -->
           <!-- </el-space> -->
         </el-card>
+        <el-card>
+          <el-row>
+            <el-col :span="4"><span>温度和湿度警报设置</span></el-col>
+            <el-col :span="6"></el-col>
+            <el-col :span="1"><span>温度℃</span></el-col>
+            <el-col :span="2">
+              <el-input-number v-model="inputWarningTem" controls-position="right" />
+            </el-col>
+            <el-col :span="2"><span>当前: {{ currentWarningTem }}</span></el-col>
+            <el-col :span="1"></el-col>
+            <el-col :span="1"><span>湿度Rh%</span></el-col>
+            <el-col :span="2">
+              <el-input-number v-model="inputWarningRh" controls-position="right" />
+            </el-col>
+            <el-col :span="2"><span>当前: {{ currentWarningRh }}</span></el-col>
+            <!-- <el-col :span="1"></el-col> -->
+            <el-col :span="1">
+              <el-button @click="setWarningValues(); getWarningValues(); refresh(); displaySuccessMsg()" type="primary" text bg>提交</el-button>
+            </el-col>
+            <el-col :span="1">
+              <el-button @click="clearWarningValues(); getWarningValues(); refresh(); displaySuccessMsg()" type="primary" text bg>清除</el-button>
+            </el-col>
+          </el-row>
+        </el-card>
         <el-card class="tables">
           <div>
-            <el-table :data="tableData" style="width: 100%" max-height="500" :row-class-name="tableRowClassName">
+            <el-table :data="tableData" :key="tableUpdateKey" style="width: 100%" max-height="500" :row-class-name="tableRowClassName">
               <el-table-column type="index" min-width="10%" />
               <el-table-column prop="time" label="时间" min-width="40%">
                 <template #default="scope">
@@ -359,7 +448,7 @@ export default {
                 <template #default="scope">
                   <el-button size="small"
                     @click="test(scope.$index, scope.row), sendNotification(scope.row, tokenForm.token)">发送</el-button>
-                  <el-button size="small" @click="setWarningIndex(scope.$index)">标记测试</el-button>
+                  <!-- <el-button size="small" @click="setWarningIndex(scope.$index)">标记测试</el-button> -->
                 </template>
               </el-table-column>
             </el-table>
@@ -414,7 +503,7 @@ export default {
 }
 
 .switch-text {
-  margin-left: -20%;
+  margin-left: 5%;
   margin-right: 5%;
   margin-top: 10px;
 }
