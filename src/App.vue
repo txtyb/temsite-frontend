@@ -153,37 +153,69 @@ export default {
     // //   .then(json => data = json)
     // //   return data
     // // },
-    refresh() {
-      var url = "https://temsite-serverless.vercel.app/api/get?ts=0";
+    async refresh() {
+      let url = "https://temsite-serverless.vercel.app/api/get?ts=0";
+      // try {
+      //   let response = await fetch(url, {
+      //     method: "get", 
+      //   });
+      //   let data = await response.json();
+      //   tableData.value = data;
+      // } catch (error) {
+      //   console.log('get Failed', error);
+      // }
+      // console.log('tableData updated')
+
       fetch(url, {
         method: "get",
       })
-        // .then(data => data.text())
-        .then((data) => data.json())
-        .then((data) => (tableData.value = data));
-      console.log('tableData updated')
+        .then((res) => res.json())
+        .then((res) => tableData.value = res)
+        .catch((err) => console.log('get Failed', err))
+      // console.log('tableData updated')
 
       url =
         "https://temsite-serverless.vercel.app/api/getrh?n=" +
         dataNum.value;
+      // try {
+      //   let response = await fetch(url, {
+      //     method: "get",
+      //   });
+      //   let data = await response.json();
+      //   rhdata.value = data;
+      // } catch (error) {
+      //   console.log('getrh Failed', error);
+      // }
+
       fetch(url, {
         method: "get",
       })
-        // .then(data => data.text())
-        .then((data) => data.json())
-        .then((data) => (rhdata.value = data));
-      
-      this.getWarningValues();
+        .then((res) => res.json())
+        .then((res) => rhdata.value = res)
+        .catch((err) => console.log('getrh Failed', err))
+
+      // this.getWarningValues();
 
       url =
         "https://temsite-serverless.vercel.app/api/gettem?n=" +
         dataNum.value;
+      // try {
+      //   let response = await fetch(url, {
+      //     method: "get",
+      //   });
+      //   let data = await response.json();
+      //   temdata.value = data;
+      // } catch (error) {
+      //   console.log('gettem Failed', error);
+      // }
+
       fetch(url, {
         method: "get",
       })
-        // .then(data => data.text())
-        .then((data) => data.json())
-        .then((data) => (temdata.value = data));
+        .then((res) => res.json())
+        .then((res) => temdata.value = res)
+        .catch((err) => console.log('gettem Failed', err))
+
       // updateData(url, this.temdata);
 
       // update table view
@@ -191,7 +223,7 @@ export default {
 
       console.log("refreshed");
     },
-    test(index: number, row: any) {
+    async test(index: number, row: any) {
       console.log("this is test");
       console.log(`index=${index}`)
       console.log(row)
@@ -222,34 +254,24 @@ export default {
         .catch(error => console.error('Error:', error))
         .then(response => console.log('Success:', response));
     },
-    getWarningIndex() {
-      var url =
-        "https://temsite-serverless.vercel.app/api/getWarningIndex";
-      fetch(url, {
-        method: "get",
-      })
-        .then((data) => data.json())
-        .then((res) => (warningRowIndex.value = res));
-    },
-    setWarningIndex(index: number) {
-      var url =
-        "https://temsite-serverless.vercel.app/api/setWarningIndex?set=" + index;
-      fetch(url, {
-        method: "get",
-      })
-        .then((data) => data.text())
-        .then((res) => (console.log(res)));
-    },
-    delAllData() {
-      var url =
+    async delAllData() {
+      let url =
         "https://temsite-serverless.vercel.app/api/del";
-      fetch(url, {
-        method: "get",
-      })
-        .then((data) => data.text())
-        .then((res) => (console.log(res)));
-      tableData.value.length = 0
+      try {
+        let response = await fetch(url, {
+          method: "get",
+        });
+        let text = await response.text();
+        console.log(text)
+      } catch (error) {
+        console.log('del Failed', error);
+      }
     },
+    async handleDelSubmit() {
+      await this.delAllData()
+      tableData.value.length = 0
+      await this.refresh()
+    }, 
     tableRowClassName({ row, rowIndex }: {
       row: any
       rowIndex: number
@@ -262,7 +284,7 @@ export default {
       }
     },
     setFcmToken() {
-      var url =
+      let url =
         "https://temsite-serverless.vercel.app/api/setFcmToken?token=" +
         tokenForm.token;
       fetch(url, {
@@ -270,54 +292,72 @@ export default {
       })
         .then((res) => res.text())
         .then((res) => console.log(`tokenset: ${res}`))
-    }, 
+    },
     clearFcmToken() {
-      var url =
+      let url =
         "https://temsite-serverless.vercel.app/api/clearFcmToken"
       fetch(url, {
         method: "get",
       })
         .then((res) => res.text())
         .then((res) => console.log(`tokenclear: ${res}`))
-    }, 
-    setWarningValues() {
-      var url =
-        "https://temsite-serverless.vercel.app/api/setWarningValues?tem=" + (inputWarningTem.value?inputWarningTem.value:'') + '&rh=' + (inputWarningRh.value?inputWarningRh.value:'')
-        // "http://localhost:5000/api/setWarningValues?tem=" + (inputWarningTem.value?inputWarningTem.value:'') + '&rh=' + (inputWarningRh.value?inputWarningRh.value:'')
-      fetch(url, {
-        method: "get",
-      })
-        .then((res) => res.text())
-        .then((res) => {
-          console.log(`set: ${res}`)
-        })
-    }, 
-    getWarningValues() {
-      var url =
+    },
+    async setWarningValues() {
+      let url =
+        "https://temsite-serverless.vercel.app/api/setWarningValues?tem=" + (inputWarningTem.value ? inputWarningTem.value : '') + '&rh=' + (inputWarningRh.value ? inputWarningRh.value : '')
+      // "http://localhost:5000/api/setWarningValues?tem=" + (inputWarningTem.value?inputWarningTem.value:'') + '&rh=' + (inputWarningRh.value?inputWarningRh.value:'')
+      try {
+        let response = await fetch(url, {
+          method: "get",
+        });
+        let text = await response.text();
+        console.log(`set: ${text}`)
+      } catch (error) {
+        console.log('setWarningValues Failed', error);
+      }
+    },
+    async getWarningValues() {
+      let url =
         "https://temsite-serverless.vercel.app/api/getWarningValues"
-        // "http://localhost:5000/api/getWarningValues"
-      fetch(url, {
-        method: "get",
-      })
-        .then((res) => res.json())
-        .then((res) => {
-          console.log(`get: tem=${res.tem} rh=${res.rh}`)
-          currentWarningTem.value = res.tem ? res.tem.toString() : '无'
-          currentWarningRh.value = res.rh ? res.rh.toString() : '无'
-        })
-    }, 
-    clearWarningValues() {
-      var url =
+      // "http://localhost:5000/api/getWarningValues"
+      try {
+        let response = await fetch(url, {
+          method: "get",
+        });
+        let response2 = response.clone()
+        let res = await response.json();
+        currentWarningTem.value = res.tem ? res.tem.toString() : '无'
+        currentWarningRh.value = res.rh ? res.rh.toString() : '无'
+        let text = await response2.text()
+        console.log(`get: ${text}`)
+      } catch (error) {
+        console.log('getWarningValues Failed', error);
+      }
+    },
+    async clearWarningValues() {
+      let url =
         "https://temsite-serverless.vercel.app/api/clearWarningValues"
-        // "http://localhost:5000/api/clearWarningValues"
-      fetch(url, {
-        method: "get",
-      })
-        .then((res) => res.text())
-        .then((res) => {
-          console.log(res)
-        })
-    }, 
+      // "http://localhost:5000/api/clearWarningValues"
+      try {
+        let response = await fetch(url, {
+          method: "get",
+        });
+        let text = await response.text();
+        console.log(text)
+      } catch (error) {
+        console.log('clearWarningValues Failed', error);
+      }
+    },
+    async handleWarningValuesSubmit() {
+      await this.setWarningValues()
+      await this.getWarningValues()
+      await this.refresh()
+    },
+    async handleWarningValuesClear() {
+      await this.clearWarningValues()
+      await this.getWarningValues()
+      await this.refresh()
+    },
   },
 };
 </script>
@@ -352,7 +392,7 @@ export default {
                 <span class="dialog-footer">
                   <el-button @click="deleteDialogVisible = false">取消</el-button>
                   <el-button type="primary"
-                    @click="delAllData(), deleteDialogVisible = false, refresh(), displaySuccessMsg()">确认</el-button>
+                    @click="deleteDialogVisible = false, handleDelSubmit(), displaySuccessMsg()">确认</el-button>
                 </span>
               </template>
             </el-dialog>
@@ -405,32 +445,33 @@ export default {
           <!-- </el-space> -->
         </el-card>
         <el-card>
-          <el-row>
+          <el-row justify="space-between">
             <el-col :span="4"><span>温度和湿度警报设置</span></el-col>
-            <el-col :span="6"></el-col>
+            <el-col :span="5"></el-col>
             <el-col :span="1"><span>温度℃</span></el-col>
             <el-col :span="2">
               <el-input-number v-model="inputWarningTem" controls-position="right" />
             </el-col>
             <el-col :span="2"><span>当前: {{ currentWarningTem }}</span></el-col>
             <el-col :span="1"></el-col>
-            <el-col :span="1"><span>湿度Rh%</span></el-col>
+            <el-col :span="1"><span>湿度RH%</span></el-col>
             <el-col :span="2">
               <el-input-number v-model="inputWarningRh" controls-position="right" />
             </el-col>
             <el-col :span="2"><span>当前: {{ currentWarningRh }}</span></el-col>
             <!-- <el-col :span="1"></el-col> -->
             <el-col :span="1">
-              <el-button @click="setWarningValues(); getWarningValues(); refresh(); displaySuccessMsg()" type="primary" text bg>提交</el-button>
+              <el-button @click="handleWarningValuesSubmit(), displaySuccessMsg()" type="primary" text bg>提交</el-button>
             </el-col>
             <el-col :span="1">
-              <el-button @click="clearWarningValues(); getWarningValues(); refresh(); displaySuccessMsg()" type="primary" text bg>清除</el-button>
+              <el-button @click="handleWarningValuesClear(), displaySuccessMsg()" type="primary" text bg>清除</el-button>
             </el-col>
           </el-row>
         </el-card>
         <el-card class="tables">
           <div>
-            <el-table :data="tableData" :key="tableUpdateKey" style="width: 100%" max-height="500" :row-class-name="tableRowClassName">
+            <el-table :data="tableData" :key="tableUpdateKey" style="width: 100%" max-height="500"
+              :row-class-name="tableRowClassName">
               <el-table-column type="index" min-width="10%" />
               <el-table-column prop="time" label="时间" min-width="40%">
                 <template #default="scope">
@@ -462,6 +503,7 @@ export default {
               <div class="rawdata">
                 <p>raw tem: {{ temdata }}</p>
                 <p>raw rh: {{ rhdata }}</p>
+                <!-- <p>tableData: {{ tableData }}</p> -->
               </div>
             </el-card>
           </el-collapse-item>
